@@ -51,10 +51,13 @@ method's error over time on a log scale.
 
 ## Test problem
 
-```
-y' = y - t^2 + 1,   y(0) = 0.5,   0 <= t <= 2
-exact: y(t) = (t + 1)^2 - 0.5*e^t
-```
+$$
+y' = y - t^{2} + 1, \quad y(0) = 0.5, \quad 0 \le t \le 2
+$$
+
+$$
+\text{exact: } \; y(t) = (t + 1)^{2} - 0.5\,e^{t}
+$$
 
 This is a standard textbook example (Burden & Faires) chosen because it has
 a closed-form solution, making it easy to verify that each method converges
@@ -64,40 +67,62 @@ at its expected order.
 
 **Euler** (1st order):
 
-```
-y_{n+1} = y_n + h*f(t_n, y_n)
-```
+$$
+y_{n+1} = y_{n} + h\,f(t_{n}, y_{n})
+$$
 
 **Modified Euler** — Heun's predictor-corrector (2nd order):
 
-```
-y*      = y_n + h*f(t_n, y_n)
-y_{n+1} = y_n + h/2*(f(t_n, y_n) + f(t_{n+1}, y*))
-```
+$$
+y^{*} = y_{n} + h\,f(t_{n}, y_{n})
+$$
+
+$$
+y_{n+1} = y_{n} + \frac{h}{2}\Big(f(t_{n}, y_{n}) + f(t_{n+1}, y^{*})\Big)
+$$
 
 **RK2** — midpoint method (2nd order):
 
-```
-k1 = f(t_n, y_n)
-k2 = f(t_n + h/2, y_n + h/2*k1)
-y_{n+1} = y_n + h*k2
-```
+$$
+k_{1} = f(t_{n}, y_{n})
+$$
+
+$$
+k_{2} = f\!\left(t_{n} + \frac{h}{2},\, y_{n} + \frac{h}{2}k_{1}\right)
+$$
+
+$$
+y_{n+1} = y_{n} + h\,k_{2}
+$$
 
 **RK4** — classic Runge-Kutta (4th order):
 
-```
-k1 = f(t_n, y_n)
-k2 = f(t_n + h/2, y_n + h/2*k1)
-k3 = f(t_n + h/2, y_n + h/2*k2)
-k4 = f(t_n + h,   y_n + h*k3)
-y_{n+1} = y_n + h/6*(k1 + 2*k2 + 2*k3 + k4)
-```
+$$
+k_{1} = f(t_{n}, y_{n})
+$$
+
+$$
+k_{2} = f\!\left(t_{n} + \frac{h}{2},\, y_{n} + \frac{h}{2}k_{1}\right)
+$$
+
+$$
+k_{3} = f\!\left(t_{n} + \frac{h}{2},\, y_{n} + \frac{h}{2}k_{2}\right)
+$$
+
+$$
+k_{4} = f(t_{n} + h,\, y_{n} + h\,k_{3})
+$$
+
+$$
+y_{n+1} = y_{n} + \frac{h}{6}\Big(k_{1} + 2k_{2} + 2k_{3} + k_{4}\Big)
+$$
 
 **RKF45** — Runge-Kutta-Fehlberg (adaptive, embedded 4th/5th order):
 
-Uses the classic Fehlberg coefficients to compute a 4th-order estimate and a
-5th-order estimate at each step; the difference between them drives a
-step-size controller that keeps the local error within a chosen tolerance.
+Uses the classic Fehlberg coefficients to compute a 4th-order estimate
+$y_{n+1}^{(4)}$ and a 5th-order estimate $y_{n+1}^{(5)}$ at each step; the
+difference $\big|y_{n+1}^{(5)} - y_{n+1}^{(4)}\big|$ drives a step-size
+controller that keeps the local error within a chosen tolerance.
 
 **DOP853** — Dormand-Prince (adaptive, 8th order):
 
@@ -106,7 +131,7 @@ well-tested implementation used throughout the scientific Python ecosystem.
 
 ## Results
 
-Error at `t = 2` decreases in exactly the order expected as method order
+Error at $t = 2$ decreases in exactly the order expected as method order
 increases (Euler → Modified Euler / RK2 → RK4 → RKF45 → DOP853), with DOP853
 landing at essentially machine precision.
 
