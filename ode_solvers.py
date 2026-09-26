@@ -1,27 +1,22 @@
-"""
-Six ODE solvers, from scratch (except DOP853), compared on a test problem
-with a known exact solution.
-
-Test problem (classic Burden & Faires example -- nonlinear, closed-form
-exact solution, good for checking order of convergence):
-
-    y' = y - t^2 + 1,   y(0) = 0.5,   0 <= t <= 2
-    exact: y(t) = (t + 1)^2 - 0.5*e^t
-
-All fixed-step methods share the same signature:
-    t, y = solver(f, t0, y0, t_end, h)
-
-and work for scalar y (float) or vector y (numpy array), since y is always
-promoted to a numpy array internally -- so the exact same functions can be
-dropped into a system of ODEs (e.g. projectile motion, a pendulum, ...).
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 # ----------------------------------------------------------------------
-# Test problem
+# Dark theme (same palette as the other projects)
+# ----------------------------------------------------------------------
+plt.style.use('dark_background')
+
+BG_COLOR = '#1e1e1e'
+PANEL_COLOR = '#2b2b2b'
+TEXT_COLOR = '#e0e0e0'
+GRID_COLOR = '#444444'
+ACCENT1 = '#54a0ff'
+ACCENT2 = '#ff9f43'
+ACCENT3 = '#1dd1a1'
+
+# ----------------------------------------------------------------------
+# Change the function here to test for different functions
 # ----------------------------------------------------------------------
 def f(t, y):
     return y - t**2 + 1
@@ -174,38 +169,88 @@ methods = {
 results = {name: fn() for name, fn in methods.items()}
 
 # ----------------------------------------------------------------------
-# Table: final value, error at t_end, number of steps used
-# ----------------------------------------------------------------------
-print(f"{'Method':<16}{'y(t_end) approx':>18}{'Error':>14}{'Steps used':>14}")
-for name, (t, y) in results.items():
-    y_end = y[-1] if np.ndim(y) == 1 else y[-1].item()
-    err = abs(y_end - y_exact(t_end))
-    print(f"{name:<16}{y_end:>18.8f}{err:>14.2e}{len(t) - 1:>14d}")
-
-# ----------------------------------------------------------------------
 # Plots: solution curves, and error vs exact on a log scale
 # ----------------------------------------------------------------------
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
+fig.patch.set_facecolor(BG_COLOR)
+
+def style_axis(ax, title):
+    ax.set_facecolor(BG_COLOR)
+    ax.grid(True, color=GRID_COLOR, alpha=0.4)
+    ax.tick_params(colors=TEXT_COLOR)
+    for spine in ax.spines.values():
+        spine.set_color(GRID_COLOR)
+    ax.xaxis.label.set_color(TEXT_COLOR)
+    ax.yaxis.label.set_color(TEXT_COLOR)
+    ax.title.set_color(TEXT_COLOR)
+    ax.set_title(title)
+
+line_colors = [ACCENT1, ACCENT2, ACCENT3, '#e15fed', '#feca57', '#c8d6e5']
 
 t_fine = np.linspace(t0, t_end, 400)
-ax1.plot(t_fine, y_exact(t_fine), 'k--', lw=1.5, label='Exact')
-for name, (t, y) in results.items():
-    ax1.plot(t, y, marker='o', ms=3, lw=1.2, label=name)
+ax1.plot(t_fine, y_exact(t_fine), '--', color=TEXT_COLOR, lw=1.5, label='Exact')
+for (name, (t, y)), color in zip(results.items(), line_colors):
+    ax1.plot(t, y, marker='o', ms=3, lw=1.2, color=color, label=name)
 ax1.set_xlabel('t')
 ax1.set_ylabel('y')
-ax1.set_title("Solution: y' = y - t² + 1,  y(0) = 0.5")
-ax1.legend(fontsize=8)
-ax1.grid(alpha=0.3)
+style_axis(ax1, "Solution: y' = y - t² + 1,  y(0) = 0.5")
+leg1 = ax1.legend(fontsize=8, facecolor=PANEL_COLOR, edgecolor=GRID_COLOR)
+for txt in leg1.get_texts():
+    txt.set_color(TEXT_COLOR)
 
-for name, (t, y) in results.items():
+for (name, (t, y)), color in zip(results.items(), line_colors):
     err = np.abs(np.ravel(y) - y_exact(t))
     err = np.clip(err, 1e-16, None)
-    ax2.semilogy(t, err, marker='o', ms=3, lw=1.2, label=name)
+    ax2.semilogy(t, err, marker='o', ms=3, lw=1.2, color=color, label=name)
 ax2.set_xlabel('t')
 ax2.set_ylabel('|error| (log scale)')
-ax2.set_title('Error vs exact solution')
-ax2.legend(fontsize=8)
-ax2.grid(alpha=0.3, which='both')
+style_axis(ax2, 'Error vs exact solution')
+leg2 = ax2.legend(fontsize=8, facecolor=PANEL_COLOR, edgecolor=GRID_COLOR)
+for txt in leg2.get_texts():
+    txt.set_color(TEXT_COLOR)
+ax2.grid(True, which='both', color=GRID_COLOR, alpha=0.4)
 
 plt.tight_layout()
+
+# ----------------------------------------------------------------------
+# Center the OS window on screen (Tk / Qt / Wx backends)
+# ----------------------------------------------------------------------
+def center_window(fig):
+    try:
+        manager = fig.canvas.manager
+        backend = plt.get_backend().lower()
+        window = manager.window
+
+        if 'tk' in backend:
+            window.update_idletasks()
+            width = window.winfo_reqwidth()
+            height = window.winfo_reqheight()
+            if width <= 1 or height <= 1:
+                window.update()
+                width = window.winfo_width()
+                height = window.winfo_height()
+            screen_w = window.winfo_screenwidth()
+            screen_h = window.winfo_screenheight()
+            x = max(0, (screen_w - width) // 2)
+            y = max(0, (screen_h - height) // 2)
+            window.geometry(f"{width}x{height}+{x}+{y}")
+
+        elif 'qt' in backend:
+            screen = window.screen() if hasattr(window, 'screen') else None
+            if screen is None:
+                from matplotlib.backends.qt_compat import QtWidgets
+                screen = QtWidgets.QApplication.primaryScreen()
+            screen_geo = screen.availableGeometry()
+            frame_geo = window.frameGeometry()
+            frame_geo.moveCenter(screen_geo.center())
+            window.move(frame_geo.topLeft())
+
+        elif 'wx' in backend:
+            window.CentreOnScreen()
+
+    except Exception:
+        pass  # non-critical -- if this fails, the window just opens wherever it normally would
+
+center_window(fig)
+
 plt.show()
