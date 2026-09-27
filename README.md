@@ -1,3 +1,4 @@
+
 # ODE Solvers Comparison
 
 A from-scratch implementation and comparison of six numerical methods for
@@ -15,6 +16,13 @@ solving ordinary differential equations:
 
 All six solvers are run on the same test problem, and their accuracy is
 compared against the known closed-form solution.
+
+## Output
+
+![Solution and error comparison plots](<img width="1296" height="547" alt="Screenshot 2026-09-27 205903" src="https://github.com/user-attachments/assets/af3a3981-ded3-4e28-b22b-467e361eeb7c" />)
+
+*Left: the six numerical solutions vs. the exact solution. Right: each
+method's error over time on a log scale.*
 
 ## Features
 
