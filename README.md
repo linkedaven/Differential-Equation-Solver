@@ -42,3 +42,45 @@ precision (~10⁻¹⁴), while Euler's error grows to nearly 1.*
 - See `requirements.txt`
 
 ## Setup
+
+```bash
+git clone https://github.com/linkedaven/Differential-Equation-Solver.git
+cd Differential-Equation-Solver
+pip install -r requirements.txt
+```
+
+## Usage
+
+```bash
+python ode_solvers.py
+```
+
+A window opens showing the six numerical solutions against the exact
+solution (left) and each method's error on a log scale (right). The four
+fixed-step methods (Euler, Modified Euler, RK2, RK4) use a step size of
+`h = 0.2`; RKF45 runs adaptively with `tol = 1e-6`; DOP853 runs with
+`rtol = 1e-10` and `atol = 1e-12`.
+
+## Test problem
+
+By default, the script solves:
+
+```
+y' = y - t² + 1,    y(0) = 0.5,    t ∈ [0, 2]
+```
+
+whose closed-form solution is:
+
+```
+y(t) = (t + 1)² - 0.5·eᵗ
+```
+
+To try a different problem, edit `f(t, y)`, `y_exact(t)`, and the values of
+`t0`, `y0`, and `t_end` near the top of `ode_solvers.py`. Since every solver
+shares the same signature, the rest of the script works unchanged. To
+change the step size of the fixed-step methods, edit `h` in the comparison
+section at the bottom of the script.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
